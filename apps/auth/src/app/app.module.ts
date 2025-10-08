@@ -8,6 +8,7 @@ import { DatabaseModule } from '@edsy-services/database';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: '.env',
     }),
     DatabaseModule,
   ],
