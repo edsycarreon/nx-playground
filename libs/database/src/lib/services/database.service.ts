@@ -2,11 +2,11 @@ import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Kysely, PostgresDialect } from 'kysely';
 import { Pool } from 'pg';
-import { Database } from '../types/database.type';
+import { DB } from '../types/database.type';
 
 @Injectable()
 export class DatabaseService implements OnModuleInit, OnModuleDestroy {
-  private _db: Kysely<Database> | null = null;
+  private _db: Kysely<DB> | null = null;
 
   constructor(private configService: ConfigService) {}
 
@@ -21,13 +21,13 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
       }),
     });
 
-    this._db = new Kysely<Database>({
+    this._db = new Kysely<DB>({
       dialect,
     });
 
     // Test connection
     try {
-      await this._db.selectFrom('users').select('id').limit(1).execute();
+      await this._db.selectFrom('person').select('id').limit(1).execute();
       console.log('✅ Database connected successfully');
     } catch (error) {
       console.error('❌ Database connection failed:', error);
@@ -42,7 +42,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  get db(): Kysely<Database> {
+  get db(): Kysely<DB> {
     if (!this._db) {
       throw new Error('Database not initialized');
     }
