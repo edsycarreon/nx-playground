@@ -1,4 +1,9 @@
-import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleDestroy,
+  OnModuleInit,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Kysely, PostgresDialect } from 'kysely';
 import { Pool } from 'pg';
@@ -28,9 +33,9 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     // Test connection
     try {
       await this._db.selectFrom('person').select('id').limit(1).execute();
-      console.log('✅ Database connected successfully');
+      Logger.log('✅ Database connected successfully');
     } catch (error) {
-      console.error('❌ Database connection failed:', error);
+      Logger.error('❌ Database connection failed:', error);
       throw error;
     }
   }
@@ -38,7 +43,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   async onModuleDestroy() {
     if (this._db) {
       await this._db.destroy();
-      console.log('🔌 Database connection closed');
+      Logger.log('🔌 Database connection closed');
     }
   }
 
