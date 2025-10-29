@@ -33,8 +33,4 @@ yarn-error.log*
 # Misc
 .DS_Store
 .cache
-*.tsbuildinfo# Add files here to ignore them from prettier formatting
-/dist
-/coverage
-/.nx/cache
-/.nx/workspace-data
+*.tsbuildinfo
