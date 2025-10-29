@@ -15,6 +15,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@edsy-services/common": ["libs/common/src/index.ts"],
       "@edsy-services/database": ["libs/database/src/index.ts"]
     }
   },
