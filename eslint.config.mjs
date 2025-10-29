@@ -1,4 +1,6 @@
 import nx from '@nx/eslint-plugin';
+import importPlugin from 'eslint-plugin-import';
+import securityPlugin from 'eslint-plugin-security';
 
 export default [
   ...nx.configs['flat/base'],
@@ -9,6 +11,10 @@ export default [
   },
   {
     files: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'],
+    plugins: {
+      import: importPlugin,
+      security: securityPlugin,
+    },
     rules: {
       '@nx/enforce-module-boundaries': [
         'error',
