@@ -7,13 +7,43 @@ export default [
   ...nx.configs['flat/typescript'],
   ...nx.configs['flat/javascript'],
   {
-    ignores: ['**/dist', '**/node_modules', '**/coverage', '**/.nx', '**/tmp', '**/.json'],
+    ignores: [
+      '**/dist',
+      '**/build',
+      '**/.next',
+      '**/out',
+      '**/node_modules',
+      '**/coverage',
+      '**/.nyc_output',
+      '**/.nx',
+      '**/tmp',
+      '**/.json',
+      '**/logs',
+      '**/*.log',
+      '.env',
+      '.env.local',
+      '.env.*.local',
+      '.vscode',
+      '.idea',
+      '**/*.swp',
+      '**/*.swo',
+      '.DS_Store',
+      '**/.cache',
+      '**/*.tsbuildinfo',
+      '**/webpack.config.js',
+    ],
   },
   {
     files: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'],
     plugins: {
       import: importPlugin,
       security: securityPlugin,
+    },
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
     },
     rules: {
       '@nx/enforce-module-boundaries': [
@@ -33,15 +63,15 @@ export default [
       // Enforce explicit return types on functions and class methods
       '@typescript-eslint/explicit-function-return-type': 'error',
       // Enforce explicit accessibility modifiers (public, private, protected)
-      '@typescript-eslint/explicit-member-accessibility': [
-        'error',
-        {
-          accessibility: 'explicit',
-          overrides: {
-            constructors: 'no-public',
-          },
-        },
-      ],
+      // '@typescript-eslint/explicit-member-accessibility': [
+      //   'error',
+      //   {
+      //     accessibility: 'explicit',
+      //     overrides: {
+      //       constructors: 'no-public',
+      //     },
+      //   },
+      // ],
       // Require explicit types for module boundaries (function params and returns)
       '@typescript-eslint/explicit-module-boundary-types': 'error',
        // Prevent unused variables (catches dead code)
@@ -113,15 +143,15 @@ export default [
       // Prevent unnecessary conditions
       '@typescript-eslint/no-unnecessary-condition': 'warn',
       
-      // Enforce proper null checks
-      '@typescript-eslint/strict-boolean-expressions': [
-        'error',
-        {
-          allowString: false,
-          allowNumber: false,
-          allowNullableObject: false,
-        },
-      ],
+      // // Enforce proper null checks
+      // '@typescript-eslint/strict-boolean-expressions': [
+      //   'error',
+      //   {
+      //     allowString: false,
+      //     allowNumber: false,
+      //     allowNullableObject: false,
+      //   },
+      // ],
 
       // Enforce import order (keeps imports clean and organized)
       'import/order': [

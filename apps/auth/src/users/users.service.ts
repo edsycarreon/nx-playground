@@ -1,19 +1,20 @@
+import { DatabaseService, DB } from '@edsy-services/database';
 import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { Kysely } from 'kysely';
+
 import { UserResponseDto } from './dto';
-import { DatabaseService } from '@edsy-services/database';
+import { CreateUserDto } from './dto/create-user.dto';
 import { toUserResponseDto } from './mapper/users.mapper';
 
 @Injectable()
 export class UsersService {
     constructor(private readonly databaseService: DatabaseService) {}
 
-    private get db() {
+    private get db(): Kysely<DB> {
         return this.databaseService.db;
     }
 
-    async create(createUserDto: CreateUserDto) {
+    async create(createUserDto: CreateUserDto): Promise<UserResponseDto> {
         const { email, passwordHash, firstName, lastName, avatarUrl } = createUserDto;
         const user = await this.db
             .insertInto('person')
@@ -25,9 +26,9 @@ export class UsersService {
                 avatar_url: avatarUrl,
             })
             .returning(['id', 'email', 'first_name', 'last_name'])
-            .executeTakeFirst();
+            .executeTakeFirstOrThrow();
 
-        return user;
+        return toUserResponseDto(user);
     }
 
     async findByEmail(email: string): Promise<UserResponseDto | null> {
@@ -44,7 +45,7 @@ export class UsersService {
         return toUserResponseDto(user);
     }
 
-    async findOne(id: string): Promise<UserResponseDto> | null {
+    async findOne(id: string): Promise<UserResponseDto | null> {
         const user = await this.db
             .selectFrom('person')
             .selectAll()
