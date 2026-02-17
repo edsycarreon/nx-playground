@@ -1,20 +1,19 @@
-import type { Person } from '@edsy-services/database';
 import type { Selectable } from 'kysely';
 
-import type { UserResponseDto } from '../dto';
+import type { GetUserResponse } from '../../auth/types';
+import type { Person } from '../../database/types/database.type';
 
-export function toUserResponseDto(person: Partial<Selectable<Person>>): UserResponseDto {
+export function toUserResponseDto(person: Selectable<Person>): GetUserResponse {
     return {
-        id: person.id ?? undefined,
-        email: person.email ?? undefined,
-        firstName: person.first_name ?? undefined,
-        lastName: person.last_name ?? undefined,
-        avatarUrl: person.avatar_url ?? undefined,
-        emailVerified: person.email_verified ?? undefined,
-        isActive: person.is_active ?? undefined,
-        is2faEnabled: person.is_2fa_enabled ?? undefined,
-        lastLoginAt: person.last_login_at ?? undefined,
-        createdAt: person.created_at ?? undefined,
-        failedLoginAttempts: person.failed_login_attempts ?? undefined,
+        id: person.id,
+        email: person.email,
+        firstName: person.first_name,
+        lastName: person.last_name,
+        avatarUrl: person.avatar_url,
+        isEmailVerified: person.email_verified,
+        isActive: person.is_active,
+        lastLoginAt: person.last_login_at,
+        createdAt: person.created_at,
+        updatedAt: person.updated_at,
     };
 }

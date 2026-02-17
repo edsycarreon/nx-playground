@@ -4,11 +4,11 @@
   "license": "MIT",
   "scripts": {
     "dev:auth": "npx nx serve auth --configuration=development",
-    "db:migrate:up": "ts-node -r dotenv/config libs/database/src/cli/migrate.ts up",
-    "db:migrate:down": "ts-node libs/database/src/cli/migrate.ts down",
-    "db:migrate:status": "ts-node libs/database/src/cli/migrate.ts status",
-    "db:migrate:create": "ts-node libs/database/src/cli/migrate.ts create",
-    "db:generate-types": "kysely-codegen --out-file=libs/database/src/lib/types/database.type.ts"
+    "db:migrate:up": "ts-node -r dotenv/config apps/auth/src/database/cli/migrate.ts up",
+    "db:migrate:down": "ts-node apps/auth/src/database/cli/migrate.ts down",
+    "db:migrate:status": "ts-node apps/auth/src/database/cli/migrate.ts status",
+    "db:migrate:create": "ts-node apps/auth/src/database/cli/migrate.ts create",
+    "db:generate-types": "kysely-codegen --out-file=apps/auth/src/database/types/database.type.ts"
   },
   "private": true,
   "dependencies": {

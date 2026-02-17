@@ -1,4 +1,4 @@
-import { IsBoolean, IsDate, IsNumber, IsString } from 'class-validator';
+import { IsBoolean, IsDate, IsOptional, IsString } from 'class-validator';
 
 export class UserResponseDto {
     @IsString()
@@ -8,41 +8,31 @@ export class UserResponseDto {
     email: string;
 
     @IsString()
-    firstName: string;
+    @IsOptional()
+    firstName: string | null;
 
     @IsString()
-    lastName: string;
+    @IsOptional()
+    lastName: string | null;
 
     @IsString()
-    avatarUrl: string;
+    @IsOptional()
+    avatarUrl: string | null;
 
     @IsBoolean()
-    emailVerified: boolean;
+    isEmailVerified: boolean;
 
     @IsBoolean()
     isActive: boolean;
 
-    @IsBoolean()
-    is2faEnabled: boolean;
-
-    @IsString()
-    twoFASecret: string;
-
-    @IsNumber()
-    failedLoginAttempts: number;
-
     @IsDate()
-    lastLoginAt: Date;
-
-    @IsDate()
-    lockedUntil: Date;
+    @IsOptional()
+    lastLoginAt: Date | null;
 
     @IsDate()
     createdAt: Date;
 
     @IsDate()
-    updatedAt: Date;
-
-    @IsDate()
-    deletedAt: Date;
+    @IsOptional()
+    updatedAt: Date | null;
 }

@@ -1,1 +1,2 @@
-export * from './signup-response.type';
+export * from './auth.type';
+export * from './user.type';

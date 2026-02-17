@@ -1,7 +1,7 @@
-import type { UserResponseDto } from '../../users/dto';
+import type { GetUserResponse } from './user.type';
 
 export type SignUpResponse = {
-    user: UserResponseDto;
+    user: GetUserResponse;
     accessToken: string;
     refreshToken: string;
 };
