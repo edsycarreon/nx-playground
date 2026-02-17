@@ -1,13 +1,13 @@
-import { CryptoUtils } from '@edsy-services/common';
+import { CryptoUtils, JwtToken } from '@edsy-services/common';
 import { ConflictException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
-import { UserResponseDto } from '../users/dto';
-import { toUserResponseDto } from '../users/mapper/users.mapper';
 import { UsersService } from '../users/users.service';
 
 import { SignUpDto } from './dto';
+import { SignUpResponse } from './types';
 
 @Injectable()
 export class AuthService {
@@ -15,9 +15,10 @@ export class AuthService {
     constructor(
         private readonly userService: UsersService,
         private readonly configService: ConfigService,
+        private readonly jwtService: JwtService,
     ) {}
 
-    public async signUp(user: SignUpDto): Promise<UserResponseDto> {
+    public async signUp(user: SignUpDto): Promise<SignUpResponse> {
         const existingUser = await this.userService.findByEmail(user.email);
 
         if (existingUser) {
@@ -33,9 +34,28 @@ export class AuthService {
             lastName: user.lastName,
         });
 
-        const refreshToken = CryptoUtils.generateSecureToken();
-        const hashedRefreshToken = CryptoUtils.sha256(refreshToken);
+        const { accessToken, refreshToken } = await this.generateTokens(createdUser.id);
 
-        return toUserResponseDto(createdUser);
+        return {
+            user: createdUser,
+            accessToken,
+            refreshToken,
+        };
+    }
+
+    private generateTokens(email: string): JwtToken {
+        const accessToken = this.jwtService.sign(
+            {
+                sub: email,
+            },
+            {
+                secret: 'sample secret',
+                expiresIn: '1h',
+            },
+        );
+        const refreshToken = CryptoUtils.generateSecureToken();
+        // const hashedRefreshToken = CryptoUtils.sha256(refreshToken);
+
+        return { accessToken, refreshToken };
     }
 }
