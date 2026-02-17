@@ -1,71 +1,48 @@
-import {
-    isBoolean,
-    IsBoolean,
-    IsDate,
-    IsNumber,
-    IsOptional,
-    IsString,
-    IsUUID,
-} from 'class-validator';
+import { IsBoolean, IsDate, IsNumber, IsString } from 'class-validator';
 
 export class UserResponseDto {
-    @IsOptional()
     @IsString()
-    id?: string;
-
-    @IsOptional()
-    @IsString()
-    email?: string;
-
-    @IsOptional()
-    @IsString()
-    firstName?: string;
-
-    @IsOptional()
-    @IsString()
-    lastName?: string;
+    id: string;
 
     @IsString()
-    @IsOptional()
-    avatarUrl?: string;
+    email: string;
 
-    @IsOptional()
+    @IsString()
+    firstName: string;
+
+    @IsString()
+    lastName: string;
+
+    @IsString()
+    avatarUrl: string;
+
     @IsBoolean()
-    emailVerified?: boolean;
+    emailVerified: boolean;
 
-    @IsOptional()
     @IsBoolean()
-    isActive?: boolean;
+    isActive: boolean;
 
-    @IsOptional()
     @IsBoolean()
-    is2faEnabled?: boolean;
+    is2faEnabled: boolean;
 
-    @IsOptional()
     @IsString()
-    twoFASecret?: string;
+    twoFASecret: string;
 
-    @IsOptional()
     @IsNumber()
-    failedLoginAttempts?: number;
+    failedLoginAttempts: number;
 
-    @IsOptional()
     @IsDate()
-    lastLoginAt?: Date;
+    lastLoginAt: Date;
 
-    @IsOptional()
     @IsDate()
-    lockedUntil?: Date;
+    lockedUntil: Date;
 
-    @IsOptional()
     @IsDate()
-    createdAt?: Date;
+    createdAt: Date;
 
-    @IsOptional()
     @IsDate()
-    updatedAt?: Date;
+    updatedAt: Date;
 
-    @IsOptional()
     @IsDate()
-    deletedAt?: Date;
+    deletedAt: Date;
 }
