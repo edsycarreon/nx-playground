@@ -1,5 +1,5 @@
 import { GetUserResponse } from '@edsy-services/common';
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, NotFoundException, ParseUUIDPipe } from '@nestjs/common';
 
 import { CreateUserDto } from './dto/create-user.dto';
 import { UsersService } from './users.service';
@@ -14,7 +14,13 @@ export class UsersController {
     }
 
     @Get(':id')
-    async findOne(@Param('id') id: string): Promise<GetUserResponse | null> {
-        return this.usersService.findOne(id);
+    async findOne(@Param('id', ParseUUIDPipe) id: string): Promise<GetUserResponse> {
+        const user = await this.usersService.findOne(id);
+
+        if (!user) {
+            throw new NotFoundException('User not found');
+        }
+
+        return user;
     }
 }

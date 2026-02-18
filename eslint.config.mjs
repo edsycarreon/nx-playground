@@ -192,6 +192,7 @@ export default [
             '**/test/**',
             '**/tests/**',
           ],
+          packageDir: import.meta.dirname,
         },
       ],
 

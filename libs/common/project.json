@@ -15,6 +15,11 @@
         "main": "libs/common/src/index.ts",
         "assets": ["libs/common/*.md"]
       }
+    },
+    "test": {
+      "options": {
+        "passWithNoTests": true
+      }
     }
   }
 }

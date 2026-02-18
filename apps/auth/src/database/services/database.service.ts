@@ -1,6 +1,12 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import {
+    Injectable,
+    InternalServerErrorException,
+    Logger,
+    OnModuleDestroy,
+    OnModuleInit,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Kysely, PostgresDialect } from 'kysely';
 import { Pool } from 'pg';
@@ -47,7 +53,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
 
     get db(): Kysely<DB> {
         if (!this._db) {
-            throw new Error('Database not initialized');
+            throw new InternalServerErrorException('Database not initialized');
         }
         return this._db;
     }

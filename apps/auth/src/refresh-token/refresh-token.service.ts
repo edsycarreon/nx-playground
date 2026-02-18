@@ -1,4 +1,5 @@
-import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import { handleDatabaseError } from '@edsy-services/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Request } from 'express';
 import { Kysely } from 'kysely';
 
@@ -38,8 +39,7 @@ export class RefreshTokenService {
                 })
                 .execute();
         } catch (error) {
-            this.logger.error('Failed to create refresh token', error.stack);
-            throw new InternalServerErrorException('Failed to create refresh token');
+            handleDatabaseError(error, this.logger, 'RefreshTokenService.create');
         }
     }
 }
