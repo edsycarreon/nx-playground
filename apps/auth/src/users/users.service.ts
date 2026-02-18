@@ -1,12 +1,12 @@
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { Kysely } from 'kysely';
 
-import { GetUserResponse } from '../auth/types';
+import { GetUserResponse, GetUserWithCredentialsResponse } from '../auth/types';
 import { DatabaseService } from '../database/services/database.service';
 import { DB } from '../database/types/database.type';
 
 import { CreateUserDto } from './dto/create-user.dto';
-import { toUserResponseDto } from './mapper/users.mapper';
+import { toUserResponse, toUserWithCredentialsReponse } from './mapper/users.mapper';
 
 @Injectable()
 export class UsersService {
@@ -34,7 +34,7 @@ export class UsersService {
                 .returningAll()
                 .executeTakeFirstOrThrow();
 
-            return toUserResponseDto(user);
+            return toUserResponse(user);
         } catch (error) {
             this.logger.error('Failed to create user', error.stack);
             throw new InternalServerErrorException('Failed to create user');
@@ -52,7 +52,21 @@ export class UsersService {
             return null;
         }
 
-        return toUserResponseDto(user);
+        return toUserResponse(user);
+    }
+
+    async findCredentialsByEmail(email: string): Promise<GetUserWithCredentialsResponse | null> {
+        const user = await this.db
+            .selectFrom('person')
+            .selectAll()
+            .where('email', '=', email)
+            .executeTakeFirst();
+
+        if (!user) {
+            return null;
+        }
+
+        return toUserWithCredentialsReponse(user);
     }
 
     async findOne(id: string): Promise<GetUserResponse | null> {
@@ -66,6 +80,6 @@ export class UsersService {
             return null;
         }
 
-        return toUserResponseDto(user);
+        return toUserResponse(user);
     }
 }

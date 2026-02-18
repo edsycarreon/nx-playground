@@ -1,5 +1,10 @@
 import { CryptoUtils, JwtToken } from '@edsy-services/common';
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+    ConflictException,
+    Injectable,
+    NotFoundException,
+    UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -10,8 +15,8 @@ import ms from 'ms';
 import { RefreshTokenService } from '../refresh-token/refresh-token.service';
 import { UsersService } from '../users/users.service';
 
-import { DeviceInfoDto, SignUpDto } from './dto';
-import { SignUpResponse } from './types';
+import { SignInDto, SignUpDto } from './dto';
+import { SignInResponse, SignUpResponse } from './types';
 
 @Injectable()
 export class AuthService {
@@ -39,11 +44,7 @@ export class AuthService {
             lastName: user.lastName,
         });
 
-        const { accessToken, refreshToken } = await this.generateTokens(
-            createdUser.id,
-            req,
-            user.deviceType,
-        );
+        const { accessToken, refreshToken } = await this.generateTokens(createdUser.id, req);
 
         return {
             user: createdUser,
@@ -52,11 +53,31 @@ export class AuthService {
         };
     }
 
-    private async generateTokens(
-        personId: string,
-        req: Request,
-        device?: DeviceInfoDto,
-    ): Promise<JwtToken> {
+    public async signIn(user: SignInDto, req: Request): Promise<SignInResponse> {
+        const existingUser = await this.userService.findCredentialsByEmail(user.email);
+
+        if (!existingUser) {
+            throw new NotFoundException('User not found');
+        }
+
+        const isPasswordValid = await bcrypt.compare(user.password, existingUser.passwordHash);
+
+        if (!isPasswordValid) {
+            throw new UnauthorizedException('Invalid credentials.');
+        }
+
+        const { accessToken, refreshToken } = await this.generateTokens(existingUser.id, req);
+
+        const { passwordHash: _, ...userWithoutPassword } = existingUser;
+
+        return {
+            user: userWithoutPassword,
+            accessToken,
+            refreshToken,
+        };
+    }
+
+    private async generateTokens(personId: string, req: Request): Promise<JwtToken> {
         const secret = this.configService.get<string>('auth.jwtSecret');
         const expiresIn = this.configService.get<StringValue>(
             'auth.jwtAccessExpiration',
@@ -81,7 +102,6 @@ export class AuthService {
                 personId,
                 tokenHash: hashedRefreshToken,
                 expiresAt: new Date(Date.now() + ms(refreshExpiry as StringValue)),
-                deviceType: device,
             },
             req,
         );
