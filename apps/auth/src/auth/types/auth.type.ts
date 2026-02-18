@@ -5,3 +5,9 @@ export type SignUpResponse = {
     accessToken: string;
     refreshToken: string;
 };
+
+export type SignInResponse = {
+    user: GetUserResponse;
+    accessToken: string;
+    refreshToken: string;
+};

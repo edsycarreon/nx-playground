@@ -18,9 +18,11 @@ export class RefreshTokenService {
     }
 
     public async create(payload: CreateRefreshTokenDto, req: Request): Promise<void> {
-        const { personId, tokenHash, expiresAt, deviceType } = payload;
+        const { personId, tokenHash, expiresAt } = payload;
         const ipAddress = req.ip || (req.headers['x-forwarded-for'] as string);
         const userAgent = req.headers['user-agent'];
+        const deviceName = req.headers['x-device-name'] as string | undefined;
+        const deviceType = req.headers['x-device-type'] as string | undefined;
 
         try {
             await this.db
@@ -31,8 +33,8 @@ export class RefreshTokenService {
                     expires_at: expiresAt,
                     ip_address: ipAddress,
                     user_agent: userAgent,
-                    device_name: deviceType?.deviceName,
-                    device_type: deviceType?.deviceType,
+                    device_name: deviceName,
+                    device_type: deviceType,
                 })
                 .execute();
         } catch (error) {

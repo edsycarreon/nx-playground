@@ -1,7 +1,4 @@
-import { Type } from 'class-transformer';
-import { IsDate, IsOptional, IsString, ValidateNested } from 'class-validator';
-
-import { DeviceInfoDto } from '../../auth/dto/device-info.dto';
+import { IsDate, IsString } from 'class-validator';
 
 export class CreateRefreshTokenDto {
     @IsString()
@@ -12,9 +9,4 @@ export class CreateRefreshTokenDto {
 
     @IsDate()
     expiresAt: Date;
-
-    @IsOptional()
-    @ValidateNested()
-    @Type(() => DeviceInfoDto)
-    deviceType?: DeviceInfoDto;
 }

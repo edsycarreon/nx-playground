@@ -3,8 +3,8 @@ import { Body, Controller, HttpCode, HttpStatus, Post, Req } from '@nestjs/commo
 import { Request } from 'express';
 
 import { AuthService } from './auth.service';
-import { SignUpDto } from './dto';
-import { SignUpResponse } from './types';
+import { SignInDto, SignUpDto } from './dto';
+import { SignInResponse, SignUpResponse } from './types';
 
 @Controller('auth')
 export class AuthController {
@@ -15,5 +15,12 @@ export class AuthController {
     @HttpCode(HttpStatus.CREATED)
     signup(@Body() user: SignUpDto, @Req() req: Request): Promise<SignUpResponse> {
         return this.authService.signUp(user, req);
+    }
+
+    @Public()
+    @Post('signin')
+    @HttpCode(HttpStatus.OK)
+    signin(@Body() user: SignInDto, @Req() req: Request): Promise<SignInResponse> {
+        return this.authService.signIn(user, req);
     }
 }
