@@ -1,7 +1,9 @@
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { Kysely } from 'kysely';
 
-import { GetUserResponse, GetUserWithCredentialsResponse } from '../auth/types';
+import { GetUserResponse } from '@edsy-services/common';
+
+import { GetUserWithCredentialsResponse } from '../auth/types';
 import { DatabaseService } from '../database/services/database.service';
 import { DB } from '../database/types/database.type';
 

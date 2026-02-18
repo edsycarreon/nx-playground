@@ -1,6 +1,7 @@
+import type { GetUserResponse } from '@edsy-services/common';
 import type { Selectable } from 'kysely';
 
-import type { GetUserResponse, GetUserWithCredentialsResponse } from '../../auth/types';
+import type { GetUserWithCredentialsResponse } from '../../auth/types';
 import type { Person } from '../../database/types/database.type';
 
 export function toUserResponse(person: Selectable<Person>): GetUserResponse {

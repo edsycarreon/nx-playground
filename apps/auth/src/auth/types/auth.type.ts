@@ -1,4 +1,4 @@
-import type { GetUserResponse } from './user.type';
+import type { GetUserResponse } from '@edsy-services/common';
 
 export type SignUpResponse = {
     user: GetUserResponse;
