@@ -3,6 +3,7 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import type { StringValue } from 'ms';
 
 import { UsersService } from '../users/users.service';
 
@@ -11,7 +12,6 @@ import { SignUpResponse } from './types';
 
 @Injectable()
 export class AuthService {
-    private readonly saltRounds = 10;
     constructor(
         private readonly userService: UsersService,
         private readonly configService: ConfigService,
@@ -25,7 +25,10 @@ export class AuthService {
             throw new ConflictException('User already exists.');
         }
 
-        const hashedPassword = await bcrypt.hash(user.password, this.saltRounds);
+        const hashedPassword = await bcrypt.hash(
+            user.password,
+            this.configService.getOrThrow('auth.hashSaltRounds'),
+        );
 
         const createdUser = await this.userService.create({
             email: user.email,
@@ -34,7 +37,7 @@ export class AuthService {
             lastName: user.lastName,
         });
 
-        const { accessToken, refreshToken } = await this.generateTokens(createdUser.id);
+        const { accessToken, refreshToken } = this.generateTokens(createdUser.id);
 
         return {
             user: createdUser,
@@ -43,18 +46,25 @@ export class AuthService {
         };
     }
 
-    private generateTokens(email: string): JwtToken {
+    private generateTokens(userId: string): JwtToken {
+        const secret = this.configService.get<string>('auth.jwtSecret');
+        const expiresIn = this.configService.get<StringValue>(
+            'auth.jwtAccessExpiration',
+            '15m' as StringValue,
+        );
         const accessToken = this.jwtService.sign(
             {
-                sub: email,
+                sub: userId,
             },
             {
-                secret: 'sample secret',
-                expiresIn: '1h',
+                secret,
+                expiresIn,
             },
         );
         const refreshToken = CryptoUtils.generateSecureToken();
         // const hashedRefreshToken = CryptoUtils.sha256(refreshToken);
+
+        //TODO: Implement the refresh token service
 
         return { accessToken, refreshToken };
     }
