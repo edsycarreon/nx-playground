@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { Kysely } from 'kysely';
 
 import { GetUserResponse } from '../auth/types';
@@ -10,6 +10,8 @@ import { toUserResponseDto } from './mapper/users.mapper';
 
 @Injectable()
 export class UsersService {
+    private readonly logger = new Logger(UsersService.name);
+
     constructor(private readonly databaseService: DatabaseService) {}
 
     private get db(): Kysely<DB> {
@@ -18,19 +20,25 @@ export class UsersService {
 
     async create(createUserDto: CreateUserDto): Promise<GetUserResponse> {
         const { email, passwordHash, firstName, lastName, avatarUrl } = createUserDto;
-        const user = await this.db
-            .insertInto('person')
-            .values({
-                email,
-                first_name: firstName,
-                last_name: lastName,
-                password_hash: passwordHash,
-                avatar_url: avatarUrl,
-            })
-            .returningAll()
-            .executeTakeFirstOrThrow();
 
-        return toUserResponseDto(user);
+        try {
+            const user = await this.db
+                .insertInto('person')
+                .values({
+                    email,
+                    first_name: firstName,
+                    last_name: lastName,
+                    password_hash: passwordHash,
+                    avatar_url: avatarUrl,
+                })
+                .returningAll()
+                .executeTakeFirstOrThrow();
+
+            return toUserResponseDto(user);
+        } catch (error) {
+            this.logger.error('Failed to create user', error.stack);
+            throw new InternalServerErrorException('Failed to create user');
+        }
     }
 
     async findByEmail(email: string): Promise<GetUserResponse | null> {

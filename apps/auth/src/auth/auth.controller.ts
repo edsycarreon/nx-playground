@@ -1,5 +1,6 @@
 import { Public } from '@edsy-services/decorators';
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post, Req } from '@nestjs/common';
+import { Request } from 'express';
 
 import { AuthService } from './auth.service';
 import { SignUpDto } from './dto';
@@ -12,7 +13,7 @@ export class AuthController {
     @Public()
     @Post('signup')
     @HttpCode(HttpStatus.CREATED)
-    signup(@Body() user: SignUpDto): Promise<SignUpResponse> {
-        return this.authService.signUp(user);
+    signup(@Body() user: SignUpDto, @Req() req: Request): Promise<SignUpResponse> {
+        return this.authService.signUp(user, req);
     }
 }

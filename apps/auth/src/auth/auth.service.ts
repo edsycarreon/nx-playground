@@ -3,11 +3,14 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { Request } from 'express';
 import type { StringValue } from 'ms';
+import ms from 'ms';
 
+import { RefreshTokenService } from '../refresh-token/refresh-token.service';
 import { UsersService } from '../users/users.service';
 
-import { SignUpDto } from './dto';
+import { DeviceInfoDto, SignUpDto } from './dto';
 import { SignUpResponse } from './types';
 
 @Injectable()
@@ -16,19 +19,18 @@ export class AuthService {
         private readonly userService: UsersService,
         private readonly configService: ConfigService,
         private readonly jwtService: JwtService,
+        private readonly refreshTokenService: RefreshTokenService,
     ) {}
 
-    public async signUp(user: SignUpDto): Promise<SignUpResponse> {
+    public async signUp(user: SignUpDto, req: Request): Promise<SignUpResponse> {
         const existingUser = await this.userService.findByEmail(user.email);
 
         if (existingUser) {
             throw new ConflictException('User already exists.');
         }
 
-        const hashedPassword = await bcrypt.hash(
-            user.password,
-            this.configService.getOrThrow('auth.hashSaltRounds'),
-        );
+        const saltRounds = this.configService.getOrThrow<number>('auth.hashSaltRounds');
+        const hashedPassword = await bcrypt.hash(user.password, saltRounds);
 
         const createdUser = await this.userService.create({
             email: user.email,
@@ -37,7 +39,11 @@ export class AuthService {
             lastName: user.lastName,
         });
 
-        const { accessToken, refreshToken } = this.generateTokens(createdUser.id);
+        const { accessToken, refreshToken } = await this.generateTokens(
+            createdUser.id,
+            req,
+            user.deviceType,
+        );
 
         return {
             user: createdUser,
@@ -46,15 +52,21 @@ export class AuthService {
         };
     }
 
-    private generateTokens(userId: string): JwtToken {
+    private async generateTokens(
+        personId: string,
+        req: Request,
+        device?: DeviceInfoDto,
+    ): Promise<JwtToken> {
         const secret = this.configService.get<string>('auth.jwtSecret');
         const expiresIn = this.configService.get<StringValue>(
             'auth.jwtAccessExpiration',
             '15m' as StringValue,
         );
+        const refreshExpiry = this.configService.get<string>('auth.jwtRefreshExpiration');
+
         const accessToken = this.jwtService.sign(
             {
-                sub: userId,
+                sub: personId,
             },
             {
                 secret,
@@ -62,9 +74,17 @@ export class AuthService {
             },
         );
         const refreshToken = CryptoUtils.generateSecureToken();
-        // const hashedRefreshToken = CryptoUtils.sha256(refreshToken);
+        const hashedRefreshToken = CryptoUtils.sha256(refreshToken);
 
-        //TODO: Implement the refresh token service
+        await this.refreshTokenService.create(
+            {
+                personId,
+                tokenHash: hashedRefreshToken,
+                expiresAt: new Date(Date.now() + ms(refreshExpiry as StringValue)),
+                deviceType: device,
+            },
+            req,
+        );
 
         return { accessToken, refreshToken };
     }
