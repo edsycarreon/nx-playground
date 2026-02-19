@@ -1,6 +1,7 @@
 import { CryptoUtils, JwtToken } from '@edsy-services/common';
 import {
     ConflictException,
+    ForbiddenException,
     Injectable,
     NotFoundException,
     UnauthorizedException,
@@ -60,15 +61,28 @@ export class AuthService {
             throw new NotFoundException('User not found');
         }
 
+        if (existingUser.lockedUntil && existingUser.lockedUntil > new Date()) {
+            throw new ForbiddenException('Account is temporarily locked. Try again later.');
+        }
+
+        if (existingUser.lockedUntil && existingUser.lockedUntil <= new Date()) {
+            await this.userService.resetFailedLoginAttempts(existingUser.id);
+        }
+
         const isPasswordValid = await bcrypt.compare(user.password, existingUser.passwordHash);
 
         if (!isPasswordValid) {
+            await this.userService.incrementFailedLoginAttempts(existingUser.id);
             throw new UnauthorizedException('Invalid credentials.');
         }
 
+        await this.userService.resetFailedLoginAttempts(existingUser.id);
+
         const { accessToken, refreshToken } = await this.generateTokens(existingUser.id, req);
 
-        const { passwordHash: _, ...userWithoutPassword } = existingUser;
+        const { passwordHash: _, lockedUntil: __, ...userWithoutPassword } = existingUser;
+
+        await this.userService.updateLastSignedIn(existingUser.id);
 
         return {
             user: userWithoutPassword,

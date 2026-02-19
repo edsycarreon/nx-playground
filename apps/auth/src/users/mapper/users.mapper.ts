@@ -31,6 +31,8 @@ export function toUserWithCredentialsReponse(
         avatarUrl: person.avatar_url,
         isEmailVerified: person.email_verified,
         isActive: person.is_active,
+        failedLoginAttempts: person.failed_login_attempts,
+        lockedUntil: person.locked_until,
         lastLoginAt: person.last_login_at,
         createdAt: person.created_at,
         updatedAt: person.updated_at,

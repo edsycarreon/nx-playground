@@ -1,6 +1,7 @@
-import { GetUserResponse, handleDatabaseError } from '@edsy-services/common';
+import { GetUserResponse, handleDatabaseError, MAX_LOGIN_ATTEMPTS } from '@edsy-services/common';
 import { Injectable, Logger } from '@nestjs/common';
-import { Kysely } from 'kysely';
+import { addDays } from 'date-fns';
+import { Kysely, sql } from 'kysely';
 
 import { GetUserWithCredentialsResponse } from '../auth/types';
 import { DatabaseService } from '../database/services/database.service';
@@ -81,5 +82,49 @@ export class UsersService {
         }
 
         return toUserResponse(user);
+    }
+
+    async incrementFailedLoginAttempts(personId: string): Promise<void> {
+        try {
+            await this.db
+                .updateTable('person')
+                .set({
+                    failed_login_attempts: sql`failed_login_attempts + 1`,
+                    locked_until: sql`CASE WHEN failed_login_attempts + 1 >= ${MAX_LOGIN_ATTEMPTS} THEN ${addDays(new Date(), 1).toISOString()}::timestamptz ELSE locked_until END`,
+                    updated_at: new Date(),
+                })
+                .where('id', '=', personId)
+                .executeTakeFirst();
+        } catch (error) {
+            handleDatabaseError(error, this.logger, 'UsersService.incrementFailedLoginAttempts');
+        }
+    }
+
+    async resetFailedLoginAttempts(personId: string): Promise<void> {
+        try {
+            await this.db
+                .updateTable('person')
+                .set({
+                    failed_login_attempts: 0,
+                    locked_until: null,
+                    updated_at: new Date(),
+                })
+                .where('id', '=', personId)
+                .executeTakeFirst();
+        } catch (error) {
+            handleDatabaseError(error, this.logger, 'UsersService.resetFailedLoginAttempts');
+        }
+    }
+
+    async updateLastSignedIn(personId: string): Promise<void> {
+        try {
+            await this.db
+                .updateTable('person')
+                .set({ last_login_at: new Date(), updated_at: new Date() })
+                .where('id', '=', personId)
+                .executeTakeFirst();
+        } catch (error) {
+            handleDatabaseError(error, this.logger, 'UsersService.updateLastSignedIn');
+        }
     }
 }

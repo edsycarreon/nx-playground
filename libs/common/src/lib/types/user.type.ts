@@ -6,6 +6,7 @@ export type GetUserResponse = {
     avatarUrl: string | null;
     isEmailVerified: boolean;
     isActive: boolean;
+    failedLoginAttempts: number;
     lastLoginAt: Date | null;
     createdAt: Date;
     updatedAt: Date | null;

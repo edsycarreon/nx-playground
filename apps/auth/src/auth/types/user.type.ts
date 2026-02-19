@@ -7,6 +7,8 @@ export type GetUserWithCredentialsResponse = {
     avatarUrl: string | null;
     isEmailVerified: boolean;
     isActive: boolean;
+    failedLoginAttempts: number;
+    lockedUntil: Date | null;
     lastLoginAt: Date | null;
     createdAt: Date;
     updatedAt: Date | null;
